@@ -3,6 +3,9 @@ from random import choice
 
 
 def random_generate_graph(n, m):
+    """
+    Random generates a graph with n vertices and m edges
+    """
     graph = DirectedGraph(n)
     graph.set_number_of_edges(m)
     set_of_vertices = [i for i in range(n)]
@@ -22,23 +25,28 @@ def random_generate_graph(n, m):
 
 
 def load_from_file(file_name):
-    with open(file_name, "r") as file:
-        first_line = file.readline()
-        first_line = first_line.strip().split()
-        vertices, edges = int(first_line[0]), int(first_line[1])
-        graph = DirectedGraph(vertices)
+    """Load the file from file_name and return it as a directedGraph"""
+    try:
+        with open(file_name, "r") as file:
+            first_line = file.readline()
+            first_line = first_line.strip().split()
+            vertices, edges = int(first_line[0]), int(first_line[1])
+            graph = DirectedGraph(vertices)
 
-        for times in range(edges):
-            line = file.readline()
-            line = line.strip().split()
-            start, end, cost = int(line[0]), int(line[1]), int(line[2])
-            graph.add_edge(start, end, cost)
-    print("Graph loaded.")
+            for times in range(edges):
+                line = file.readline()
+                line = line.strip().split()
+                start, end, cost = int(line[0]), int(line[1]), int(line[2])
+                graph.add_edge(start, end, cost)
+        print("Graph loaded.")
+        return graph
 
-    return graph
+    except FileNotFoundError:
+        print("File doesn't exist!")
 
 
 def write_to_file(graph, file_name):
+    """Write the graph the file_name"""
     with open(file_name, "w") as file:
         edges = graph.get_number_of_edges()
         file.write(str(graph.get_number_of_vertices()) + " " + str(edges) + "\n")
@@ -63,12 +71,11 @@ class Console:
         print("Give vertices x and y:")
         start = int(input())
         end = int(input())
-        result = {True: "Yes", False: "No"}
+        result = {True: "Yes", False: "No", -1: "No"}
         print(result[self.__graph.is_edge(start, end)])
 
     def __get_degrees(self):
-        print("Give vertex:")
-        vertex = int(input())
+        vertex = int(input("Give vertex:"))
         print("Out degree: " + str(self.__graph.get_out_degree(vertex)))
         print("In degree: " + str(self.__graph.get_in_degree(vertex)))
 
@@ -80,38 +87,35 @@ class Console:
         print(self.__graph.retrieve_cost(start, end))
         print("Give new cost:")
         cost = int(input())
-        self.__graph.modify_edge_cost(start, end, cost)
+        if self.__graph.modify_edge_cost(start, end, cost) == -1:
+            print("The edge does not exists!")
 
     def __add_vertex(self):
         print("Give new vertex:")
         vertex = int(input())
-        self.__graph.add_vertex(vertex)
+        if self.__graph.add_vertex(vertex) == -1:
+            print("The vertex already exists!")
 
     def __isolated_vertices(self):
         print(self.__graph.all_isolated_vertices())
-
-    def __parse_out(self):
-        print("Get vertex:")
-        x = int(input())
-        out = self.__graph.parse_iterable_out(x)
-        print(out)
-        in_z = self.__graph.parse_iterable_in(x)
-        print(in_z)
 
     def __add_edge(self):
         start = int(input("Give edge start:"))
         end = int(input("Give edge end:"))
         cost = int(input("Give edge cost:"))
-        self.__graph.add_edge(start, end, cost)
+        if self.__graph.add_edge(start, end, cost) == 0:
+            print("The edge already exits!")
 
     def __remove_edge(self):
         start = int(input("Give edge start:"))
         end = int(input("Give edge end:"))
-        self.__graph.remove_edge(start, end)
+        if self.__graph.remove_edge(start, end) == -1:
+            print("The edge does not exist!")
 
     def __remove_vertex(self):
         vertex = int(input("Give vertex you want to remove:"))
-        self.__graph.remove_vertex(vertex)
+        if self.__graph.remove_vertex(vertex) == -1:
+            print("The vertex does not exist!")
 
     def __copy_graph(self):
         print("Copying the graph...")
@@ -137,9 +141,12 @@ class Console:
         write_to_file(self.__graph, file_name)
 
     def __generate_graph(self):
-        number_vertices = int(input("Enter the number of vertices:"))
-        number_edges = int(input("Enter the number of edges:"))
-        self.__graph = random_generate_graph(number_vertices, number_edges)
+        try:
+            number_vertices = int(input("Enter the number of vertices:"))
+            number_edges = int(input("Enter the number of edges:"))
+            self.__graph = random_generate_graph(number_vertices, number_edges)
+        except ValueError:
+            print("Invalid values for the vertices and edges")
 
     @staticmethod
     def print_menu():
